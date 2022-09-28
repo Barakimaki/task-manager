@@ -33,7 +33,7 @@ const NavBar = ({window, setPageTitle, handleDrawerToggle, mobileOpen, drawerWid
             <List>
                 <ListItem disablePadding onClick={()=> {
                     setPageTitle('My Projects')
-                    navigate('/TaskManager/projects')
+                    navigate('/projects')
                 }}>
                     <ListItemButton>
                         <ListItemIcon>
@@ -44,7 +44,7 @@ const NavBar = ({window, setPageTitle, handleDrawerToggle, mobileOpen, drawerWid
                 </ListItem>
                 <ListItem disablePadding onClick={()=> {
                     setPageTitle('Project\'s tasks')
-                    navigate('/TaskManager/projectsTasks')
+                    navigate('/projectsTasks')
                 }}>
                     <ListItemButton>
                         <ListItemIcon>
@@ -58,7 +58,7 @@ const NavBar = ({window, setPageTitle, handleDrawerToggle, mobileOpen, drawerWid
             <List>
                 <ListItem disablePadding onClick={()=> {
                     setPageTitle('My Tasks')
-                    navigate('/TaskManager/myTasks')
+                    navigate('/myTasks')
                 }}>
                     <ListItemButton>
                         <ListItemIcon>
@@ -69,7 +69,7 @@ const NavBar = ({window, setPageTitle, handleDrawerToggle, mobileOpen, drawerWid
                 </ListItem>
                 <ListItem disablePadding onClick={()=> {
                     setPageTitle('Tasks Calendar')
-                    navigate('/TaskManager/tasksCalendar')
+                    navigate('/tasksCalendar')
                 }}>
                     <ListItemButton>
                         <ListItemIcon>

@@ -2,9 +2,9 @@ import TaskPage from "../pages/tasksPage/TaskPage";
 
 
 export const privateRoutes = [
-    {path: '/TaskManager/myTasks', component: <TaskPage />},
+    {path: '/myTasks', component: <TaskPage />},
 ]
 
 // export const publicRoutes = [
-//     {path: '/TaskManager/*', component: <Login />},
+//     {path: '/*', component: <Login />},
 // ]
