@@ -1,0 +1,10 @@
+.taskPage {
+  display: grid;
+  grid-template-columns: 3fr 3fr 3fr;
+  grid-column-gap: 10px;
+  align-items: start;
+  s.card {
+    min-height: 95%;
+  }
+
+}
