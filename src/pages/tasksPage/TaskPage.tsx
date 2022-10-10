@@ -35,18 +35,6 @@ const TaskPage = () => {
 
     const tasks: Task[] = useSelector(selectTasks) || []
 
-
-
-    let [TodoLength, setTodoLength] = useState(tasks.filter(task => task.status === taskStatus.Todo).length)
-    let [InProgressLength, setInProgressLength] = useState(tasks.filter(task => task.status === taskStatus.InProgress).length)
-    let [CompletedLength, setCompletedLength ]= useState(tasks.filter(task => task.status === taskStatus.Completed).length)
-
-    useEffect(()=>{
-        setTodoLength(tasks.filter(task => task.status === taskStatus.Todo).length)
-        setInProgressLength(tasks.filter(task => task.status === taskStatus.InProgress).length)
-        setCompletedLength(tasks.filter(task => task.status === taskStatus.Completed).length)
-    }, [tasks])
-
     const dispatch = useDispatch()
 
     const [open, setOpen] = useState(false);
