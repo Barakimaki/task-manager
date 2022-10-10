@@ -14,12 +14,10 @@ interface Props {
     window?: () => Window;
 }
 
-function App(props : Props) {
+function App({window} : Props) {
 
     const [pageTitle, setPageTitle] = useState('Tasks Manager')
 
-
-    const {window} = props;
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const handleDrawerToggle = () => {

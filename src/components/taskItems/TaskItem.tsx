@@ -6,35 +6,36 @@ import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import HourglassDisabledRoundedIcon from '@mui/icons-material/HourglassDisabledRounded';
 import DeleteTaskButton from "../deleteTaskButton/DeleteTaskButton";
 import style from "./styles.module.scss";
-import {Sessions, taskStatus} from "../../redux/types/tasksTypes";
+import {Task, taskStatus} from "../../store/tasks/tasks.types";
 import HourglassTopRoundedIcon from "@mui/icons-material/HourglassTopRounded";
-import {AppDispatch} from "../../redux/store";
-import {useDispatch} from "react-redux";
-import {tasksActions} from "../../redux/reducers/tasksReducer";
+import {useDispatch, useSelector} from "react-redux";
+import {removeTaskFromTasks, setNewTaskStatus} from "../../store/tasks/tasks.action";
+import {selectTasks} from "../../store/tasks/tasks.selector";
 
 type Props = {
     key: string
     id: string
     title: string
     description: string
-    sessions: Sessions[]
     status: taskStatus
 }
 
-const TaskItem = ({id, title, description, sessions, status}: Props) => {
-    const dispatch: AppDispatch = useDispatch()
+const TaskItem = ({id, title, description, status}: Props) => {
+    const dispatch = useDispatch()
+
+    const tasks: Task[] = useSelector(selectTasks) || []
 
     const deleteTask = (id: string): void => {
-        dispatch(tasksActions.deleteTask(id))
+        dispatch(removeTaskFromTasks(tasks, id))
     }
     const setTaskStatusTodo = (id: string):void => {
-        dispatch(tasksActions.setTaskStatusTodo(id))
+        dispatch(setNewTaskStatus(tasks, id, taskStatus.Todo))
     }
     const setTaskStatusInProgress = (id: string):void => {
-        dispatch(tasksActions.setTaskStatusInProgress(id))
+        dispatch(setNewTaskStatus(tasks, id, taskStatus.InProgress))
     }
     const setTaskStatusCompleted = (id: string):void => {
-        dispatch(tasksActions.setTaskStatusCompleted(id))
+        dispatch(setNewTaskStatus(tasks, id, taskStatus.Completed))
     }
     return (
         <Card>
@@ -45,25 +46,6 @@ const TaskItem = ({id, title, description, sessions, status}: Props) => {
                 <Typography variant="body2" color="text.secondary">
                     {description}
                 </Typography>
-                {sessions.map((session, index) => {
-                    if (session.timeStart) {
-                        let dataStart = new Date(session.timeStart)
-                        let dataFinish: Date | null = null
-                        if(session.timeFinish){
-                            dataFinish = new Date(session.timeFinish)
-                        }
-                        return <Typography variant="body2" color="text.secondary">
-                            {index + 1 + ' session start '
-                                + dataStart.getFullYear() + '-' + (dataStart.getMonth() + 1)
-                                + '-' + dataStart.getDate() + ' ' + dataStart.getHours() + ':' + dataStart.getMinutes() + " - " +
-                                (dataFinish ? 'finish '
-                                    + dataFinish.getFullYear() + '-' + (dataFinish.getMonth() + 1)
-                                    + '-' + dataFinish.getDate() + ' ' + dataFinish.getHours() + ':' + dataFinish.getMinutes()
-                                    : '...')
-                            }
-                        </Typography>
-                    }
-                })}
             </CardContent>
             <CardActions disableSpacing className={style.parentFlexSplit}>
             {status === taskStatus.Todo && <IconButton color='primary'

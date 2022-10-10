@@ -5,18 +5,17 @@ import {CardContent} from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import AddCircleOutlineRoundedIcon from '@mui/icons-material/AddCircleOutlineRounded';
 import {useDispatch, useSelector} from "react-redux";
-import {getTasksCompleted, getTasksInProgress, getTasksToDo} from "../../redux/selectors/tasksSelectors";
-import {AppDispatch} from '../../redux/store';
-import {tasksActions} from "../../redux/reducers/tasksReducer";
-import {taskStatus} from "../../redux/types/tasksTypes";
+import {selectTasks} from "../../store/tasks/tasks.selector";
+import {Task, taskStatus} from "../../store/tasks/tasks.types";
 import Backdrop from '@mui/material/Backdrop';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 import Fade from '@mui/material/Fade';
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import CreateTaskForm from "../../components/createTaskForm/createTaskForm";
 import {DragDropContext, Draggable, Droppable, DropResult} from "react-beautiful-dnd";
 import TaskItem from "../../components/taskItems/TaskItem";
+import {setNewTasksOrder, setNewTaskStatus} from "../../store/tasks/tasks.action";
 
 
 const style = {
@@ -34,11 +33,21 @@ const style = {
 
 const TaskPage = () => {
 
-    const tasksTodo = useSelector(getTasksToDo) || []
-    const tasksInProgress = useSelector(getTasksInProgress) || []
-    const tasksCompleted = useSelector(getTasksCompleted) || []
+    const tasks: Task[] = useSelector(selectTasks) || []
 
-    const dispatch: AppDispatch = useDispatch()
+
+
+    let [TodoLength, setTodoLength] = useState(tasks.filter(task => task.status === taskStatus.Todo).length)
+    let [InProgressLength, setInProgressLength] = useState(tasks.filter(task => task.status === taskStatus.InProgress).length)
+    let [CompletedLength, setCompletedLength ]= useState(tasks.filter(task => task.status === taskStatus.Completed).length)
+
+    useEffect(()=>{
+        setTodoLength(tasks.filter(task => task.status === taskStatus.Todo).length)
+        setInProgressLength(tasks.filter(task => task.status === taskStatus.InProgress).length)
+        setCompletedLength(tasks.filter(task => task.status === taskStatus.Completed).length)
+    }, [tasks])
+
+    const dispatch = useDispatch()
 
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
@@ -49,23 +58,24 @@ const TaskPage = () => {
         if (!result.destination) {
             return;
         }
-        const { destination, source, draggableId } = result;
+        const { destination, source, draggableId} = result;
         let to = destination.droppableId === 'Todo'
             ? taskStatus.Todo
             : destination.droppableId === 'InProgress'
                 ? taskStatus.InProgress : taskStatus.Completed
         if(destination.droppableId === source.droppableId){
-            dispatch(tasksActions.reorderTask(draggableId, destination.index, source.index))
+            dispatch(setNewTasksOrder(tasks, destination.index, source.index))
         }
         if(destination.droppableId !== source.droppableId){
+            dispatch(setNewTasksOrder(tasks, destination.index, source.index))
             if(to === taskStatus.Todo){
-                dispatch(tasksActions.setTaskStatusTodo(draggableId))
+                dispatch(setNewTaskStatus(tasks, draggableId, taskStatus.Todo))
             } else if( to === taskStatus.InProgress){
-                dispatch(tasksActions.setTaskStatusInProgress(draggableId))
+                dispatch(setNewTaskStatus(tasks, draggableId, taskStatus.InProgress))
             } else if(to === taskStatus.Completed){
-                dispatch(tasksActions.setTaskStatusCompleted(draggableId))
+                dispatch(setNewTaskStatus(tasks, draggableId, taskStatus.Completed))
             }
-            dispatch(tasksActions.reorderTask(draggableId, destination.index, source.index))
+
         }
     };
 
@@ -103,8 +113,11 @@ const TaskPage = () => {
                     <Droppable droppableId='Todo'>
                         {((provided) => <CardContent className={s.card} ref={provided.innerRef}
                                                      {...provided.droppableProps}>
-                            {tasksTodo.map((task) => <Draggable key={task.id} draggableId={task.id}
-                                                                       index={task.order}>
+                            {tasks
+                                .map((task, index) => {
+                                    if(task.status === taskStatus.Todo){
+                                        return <Draggable key={task.id} draggableId={task.id}
+                                                                       index={index}>
                                 {((provided) => <div ref={provided.innerRef}
                                                      {...provided.draggableProps}
                                                      {...provided.dragHandleProps} >
@@ -113,11 +126,10 @@ const TaskPage = () => {
                                         id={task.id}
                                         title={task.title}
                                         description={task.description}
-                                        sessions={task.sessions}
                                         status={taskStatus.Todo}
                                     />
                                 </div>)}
-                            </Draggable>)}
+                            </Draggable>}else return <></>})}
                             {provided.placeholder}
                         </CardContent>)}
                     </Droppable>
@@ -129,8 +141,11 @@ const TaskPage = () => {
                     <Droppable droppableId='InProgress'>
                         {((provided) => <CardContent ref={provided.innerRef}
                                                      {...provided.droppableProps}>
-                            {tasksInProgress.map((task) => <Draggable key={task.id} draggableId={task.id}
-                                                                             index={task.order}>
+                            {tasks
+                                .map((task, index) => {
+                                    if(task.status === taskStatus.InProgress){
+                                    return <Draggable key={task.id} draggableId={task.id}
+                                                                             index={index}>
                                 {((provided) => <div ref={provided.innerRef}
                                                      {...provided.draggableProps}
                                                      {...provided.dragHandleProps}>
@@ -139,11 +154,10 @@ const TaskPage = () => {
                                         id={task.id}
                                         title={task.title}
                                         description={task.description}
-                                        sessions = {task.sessions}
                                         status={taskStatus.InProgress}
                                     />
                                 </div>)}
-                            </Draggable>)}
+                            </Draggable>} else return <></>})}
                             {provided.placeholder}
                         </CardContent>)}
                     </Droppable>
@@ -153,21 +167,24 @@ const TaskPage = () => {
                     <Droppable droppableId='Completed'>
                         {((provided) => <CardContent ref={provided.innerRef}
                                                      {...provided.droppableProps}>
-                            {tasksCompleted.map((task) => <Draggable key={task.id} draggableId={task.id}
-                                                                            index={task.order}>
-                                {((provided) => <div ref={provided.innerRef}
-                                                     {...provided.draggableProps}
-                                                     {...provided.dragHandleProps}>
-                                    <TaskItem
-                                        key={task.id}
-                                        id={task.id}
-                                        title={task.title}
-                                        description={task.description}
-                                        sessions = {task.sessions}
-                                        status = {taskStatus.Completed}
-                                    />
-                                </div>)}
-                            </Draggable>)}
+                            {tasks
+                                .map((task, index) => {
+                                    if(task.status === taskStatus.Completed){
+                                    return <Draggable key={task.id} draggableId={task.id}
+                                               index={index}>
+                                        {((provided) => <div ref={provided.innerRef}
+                                                             {...provided.draggableProps}
+                                                             {...provided.dragHandleProps}>
+                                            <TaskItem
+                                                key={task.id}
+                                                id={task.id}
+                                                title={task.title}
+                                                description={task.description}
+                                                status = {taskStatus.Completed}
+                                            />
+                                        </div>)}
+                                    </Draggable>} else return <></>
+                                })}
                             {provided.placeholder}
                         </CardContent>)}
                     </Droppable>

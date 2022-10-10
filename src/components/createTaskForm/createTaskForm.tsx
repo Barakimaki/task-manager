@@ -1,9 +1,10 @@
 import Typography from "@mui/material/Typography";
 import {ChangeEvent, useState} from "react";
-import {AppDispatch} from "../../redux/store";
-import {useDispatch} from "react-redux";
-import {tasksActions} from "../../redux/reducers/tasksReducer";
+import {useDispatch, useSelector} from "react-redux";
 import {Button, FormControl, FormHelperText, Input, TextField} from "@mui/material";
+import {addNewTaskToTasks} from "../../store/tasks/tasks.action";
+import {selectTasks} from "../../store/tasks/tasks.selector";
+import {Task} from "../../store/tasks/tasks.types";
 
 type Props = {
     closeForm: () => void
@@ -11,16 +12,18 @@ type Props = {
 
 const CreateTaskForm = ({closeForm}: Props) => {
 
+    const tasks: Task[] = useSelector(selectTasks) || []
+
     let [inputError, setInputError] = useState(false)
 
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
 
-    const dispatch: AppDispatch = useDispatch()
+    const dispatch = useDispatch()
 
     const addTask = (title: string, description: string) => {
         if(title.length > 0){
-            dispatch(tasksActions.addTask(title, description))
+            dispatch(addNewTaskToTasks(tasks, title, description))
             closeForm()
         } else {
             setInputError(true)
